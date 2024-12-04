@@ -1,5 +1,6 @@
 import pathlib
 import pytest
+from collections import Counter
 
 INPUT_FILE = pathlib.Path(__file__).parent / 'input.csv'
 
@@ -23,13 +24,31 @@ def get_total_distance(file: str):
     return sum
 
 
+def get_similarity_score(file: str):
+    side_a = []
+    side_b = []
+
+    for line in file.splitlines():
+        a,b = line.split()
+        side_a.append(int(a))
+        side_b.append(int(b))
+
+    multipliers = Counter(side_b)
+    result = 0
+    for v in side_a:
+        result += v * multipliers[v]
+    return result
+
+
 if __name__ == "__main__":
-    print("Day1 (Part 1): What is the total distance between your lists?")
-
     with open(INPUT_FILE, mode="r") as f:
-        result = get_total_distance(f.read())
-    print(f"Result={result}")
-
+        file = f.read()
+        print("Day1 (Part 1): What is the total distance between your lists?")
+        result = get_total_distance(file)
+        print(f"Result={result}")
+        print("\nDay1 (Part 2): Calculate a total similarity score")
+        result = get_similarity_score(file)
+        print(f"Result={result}")
 
 
 TEST_INPUT = '''\
@@ -50,4 +69,15 @@ TEST_INPUT = '''\
 )
 def test_get_total_distance(input_s, expected):
     actual = get_total_distance(input_s)
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    ('input_s', 'expected'),
+    (
+        (TEST_INPUT, 31),
+    ),
+)
+def test_get_similarity_score(input_s, expected):
+    actual = get_similarity_score(input_s)
     assert actual == expected
