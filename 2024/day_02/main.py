@@ -32,7 +32,7 @@ def get_safe_reports_quantity(file: str) -> int:
     return safe_reports
 
 
-def get_safe_reports_quantity_with_dampener(file):
+def get_safe_reports_quantity_with_dampener(file: str) -> bool:
     safe_reports = 0
     for line in file.splitlines():
         report = list(map(int, line.split()))
@@ -47,7 +47,6 @@ def get_safe_reports_quantity_with_dampener(file):
                     safe_reports += 1
                     break
     return safe_reports
-
 
 
 if __name__ == "__main__":
