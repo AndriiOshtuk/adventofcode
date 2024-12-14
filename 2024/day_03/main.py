@@ -1,6 +1,6 @@
 import pathlib
+import re
 import pytest
-from itertools import count
 
 
 INPUT_FILE = pathlib.Path(__file__).parent / 'input.txt'
@@ -19,7 +19,6 @@ def get_numbers(input: str):
         "value2":")"
     }
 
-    # "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))"
     expect = "m"
     temp = ['','']
     for ch in input:
@@ -51,6 +50,23 @@ def get_numbers(input: str):
     return sum(total)
 
 
+def get_sum_with_enabled(input: str):
+    total = 0
+    enabled = True
+    commands = re.findall(r"mul\([0-9]{1,3},[0-9]{1,3}\)|do\(\)|don't\(\)", input)
+    for cmd in commands:
+        if enabled:
+            if cmd == "don't()":
+                enabled = False
+            elif cmd.startswith("mul"):
+                values = re.findall(r"[0-9]{1,3}", cmd)
+                new_value = int(values[0])*int(values[1])
+                total += new_value
+        elif cmd == "do()":
+            enabled = True
+    return total
+
+
 
 if __name__ == "__main__":
     with open(INPUT_FILE, mode="r") as f:
@@ -58,9 +74,9 @@ if __name__ == "__main__":
         print("Day3 (Part 1): Result of multiplications")
         result = get_numbers(file)
         print(f"Result={result}")
-        # print("\nDay2 (Part 2): Safe reports (if can skip one 'bad' level)")
-        # result = get_safe_reports_quantity_with_dampener(file)
-        # print(f"Result={result}")
+        print("\nDay3 (Part 2): Add do() and don't() commands")
+        result = get_sum_with_enabled(file)
+        print(f"Result= {result}")
 
 
 TEST_INPUT = '''\
@@ -77,4 +93,16 @@ xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
 
 def test_get_safe_reports_quantity(input_s, expected): #
     actual = get_numbers(input_s)
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    ('input_s', 'expected'),
+    (
+        ("xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))", 48),
+    ),
+)
+
+def test_get_sum_with_enabled(input_s, expected):
+    actual = get_sum_with_enabled(input_s)
     assert actual == expected
